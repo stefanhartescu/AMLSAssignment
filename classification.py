@@ -28,6 +28,12 @@ def SVM_age(x_tr, y_tr, x_te):
     clf = svm.SVC(C=2, degree=2, gamma='scale', kernel='rbf')
     clf.fit(x_tr, y_tr)
     return np.ravel(clf.predict(x_te))
+	
+def DTree_eyeglasses(x_tr, y_tr, x_te):
+    from sklearn.tree import DecisionTreeClassifier
+    dtree_model = DecisionTreeClassifier(max_depth=2).fit(x_tr, y_tr)
+    dtree_prediction = dtree_model.predict(x_te)
+    return np.ravel(dtree_prediction)	
 
 	 
 def classify_age(test_samples):
@@ -64,4 +70,38 @@ def classify_age(test_samples):
     final = pd.concat([labelled,c],axis=1)
     final.to_csv("task_2.csv", index=False)
 	
+def classify_eyeglasses_dtree(test_samples):
+    Xtrain, Xtest = divide_x(test_samples)
+    Xtrain = Xtrain.reshape(Xtrain.shape[0], Xtrain.shape[1] * Xtrain.shape[2])
+    Xtest = Xtest.reshape(Xtest.shape[0], Xtest.shape[1] * Xtest.shape[2])
+    Ytrain, Ytest = get_labels(2, test_samples)
+    Y_pred_te = DTree_eyeglasses(Xtrain, Ytrain, Xtest)
+    size_te = len(Y_pred_te)
+    Y_pred_tr = DTree_eyeglasses(Xtrain, Ytrain, Xtrain)
+    size_tr = len(Y_pred_tr)
+    test_accuracy = accuracy_score(Ytest, Y_pred_te) * 100
+    train_accuracy = accuracy_score(Ytrain, Y_pred_tr) * 100
+    print("Accuracy obtained on test data for eyeglass detection:")
+    print(accuracy_score(Ytest, Y_pred_te) * 100, '%')
+    print("Accuracy obtained on train data for eyeglass detection:")
+    print(accuracy_score(Ytrain, Y_pred_tr) * 100, '%')
+    print("The confusion matrix is:")
+    print(confusion_matrix(Ytest, Y_pred_te))
+    Y_pred = np.concatenate((Y_pred_tr, Y_pred_te), axis=0)
+    size_pred = len(Y_pred)
+    np.savetxt("task_3labelsdtree.csv", Y_pred, delimiter=',')
+    precision = (test_accuracy * size_te) + (train_accuracy * size_tr)
+    print(precision / size_pred)
+    percentage = [precision / size_pred]
+    np.savetxt("task_3dtreeprecision.csv", percentage, delimiter=',')
+    a = pd.read_csv("noise_classified.csv")
+    b = pd.read_csv("task_3labelsdtree.csv")
+    c = pd.read_csv("task_3dtreeprecision.csv")
+    merged = pd.concat([a, b], axis=1)
+    merged.to_csv("task_3dtree.csv", index=False)
+    labelled = pd.read_csv("task_3dtree.csv")
+    final = pd.concat([labelled, c], axis=1)
+    final.to_csv("task_3dtree.csv", index=False)	
+	
 classify_age(4000)
+classify_eyeglasses_dtree(4000)
