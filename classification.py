@@ -7,6 +7,8 @@ from sklearn.tree import DecisionTreeClassifier
 import csv
 import pandas as pd
 from sklearn.neighbors import KNeighborsClassifier
+from mlxtend.plotting import plot_learning_curves
+import matplotlib.pyplot as plt
 
 
 def get_features():
@@ -23,33 +25,33 @@ def divide_x(no_samples):
     return trainingX, testingX
 
 #implementation of training functions
-def get_labels(i, test_samples):
+def get_labels(i, no_samples):
     Y = l2.extract_labels(i)
-    trainingY = Y[:test_samples]
-    testingY = Y[test_samples:]
+    trainingY = Y[:no_samples]
+    testingY = Y[no_samples:]
     return trainingY, testingY
 
 
 def SVM_eyeglasses(x_tr, y_tr, x_te):
-    clf = svm.SVC(C=1, degree=2, gamma='scale', kernel='poly')
-    clf.fit(x_tr, y_tr)
-    return np.ravel(clf.predict(x_te))
-
-
-def SVM_smile(x_tr, y_tr, x_te):
-    clf = svm.SVC(C=1, degree=2, gamma='scale', kernel='poly')
-    clf.fit(x_tr, y_tr)
-    return np.ravel(clf.predict(x_te))
-
-
-def SVM_age(x_tr, y_tr, x_te):
     clf = svm.SVC(C=2, degree=2, gamma='scale', kernel='rbf')
     clf.fit(x_tr, y_tr)
     return np.ravel(clf.predict(x_te))
 
 
+def SVM_smile(x_tr, y_tr, x_te):
+    clf = svm.SVC(C=3, degree=2, gamma='scale', kernel='poly')
+    clf.fit(x_tr, y_tr)
+    return np.ravel(clf.predict(x_te))
+
+
+def SVM_age(x_tr, y_tr, x_te):
+    clf = svm.SVC(C=3, degree=2, gamma='scale', kernel='rbf')
+    clf.fit(x_tr, y_tr)
+    return np.ravel(clf.predict(x_te))
+
+
 def SVM_human(x_tr, y_tr, x_te):
-    clf = svm.SVC(C=1, degree=2, gamma='scale', kernel='poly')
+    clf = svm.SVC(C=3, degree=2, gamma='scale', kernel='poly')
     clf.fit(x_tr, y_tr)
     return np.ravel(clf.predict(x_te))
 
@@ -77,12 +79,12 @@ def DTree_human(x_tr, y_tr, x_te):
 
 def DTree_haircolor(x_tr, y_tr, x_te):
     from sklearn.tree import DecisionTreeClassifier
-    dtree_model = DecisionTreeClassifier(max_depth=7,max_features=7).fit(x_tr, y_tr)
+    dtree_model = DecisionTreeClassifier(max_depth=20,max_features=7, min_samples_split = 6).fit(x_tr, y_tr)
     dtree_prediction = dtree_model.predict(x_te)
     return np.ravel(dtree_prediction)
 
 def KNN_haircolor(x_tr, y_tr, x_te):
-    knn = KNeighborsClassifier(n_neighbors=6).fit(x_tr, y_tr)
+    knn = KNeighborsClassifier(n_neighbors=8).fit(x_tr, y_tr)
     knn_predictions = knn.predict(x_te)
     return knn_predictions
 
@@ -120,6 +122,10 @@ def classify_smile(test_samples):
     final = pd.concat([labelled, c], axis=1)
     final.to_csv("task_1.csv", index=False)
 
+    #learning curve
+    clf = svm.SVC(C=3, degree=2, gamma='scale', kernel='poly')
+    plot_learning_curves(Xtrain, Ytrain, Xtest, Ytest, clf)
+    plt.show()
 
 def classify_age(test_samples):
     Xtrain, Xtest = divide_x(test_samples)
@@ -153,6 +159,11 @@ def classify_age(test_samples):
     labelled = pd.read_csv("task_2.csv")
     final = pd.concat([labelled, c], axis=1)
     final.to_csv("task_2.csv", index=False)
+
+    # learning curve
+    clf = svm.SVC(C=3, degree=2, gamma='scale', kernel='rbf')
+    plot_learning_curves(Xtrain, Ytrain, Xtest, Ytest, clf)
+    plt.show()
 
 
 def classify_eyeglasses(test_samples):
@@ -188,6 +199,11 @@ def classify_eyeglasses(test_samples):
     final = pd.concat([labelled, c], axis=1)
     final.to_csv("task_3.csv", index=False)
 
+    #learning curve
+    clf = svm.SVC(C=3, degree=2, gamma='scale', kernel='poly')
+    plot_learning_curves(Xtrain, Ytrain, Xtest, Ytest, clf)
+    plt.show()
+
 
 def classify_human(test_samples):
     Xtrain, Xtest = divide_x(test_samples)
@@ -221,6 +237,11 @@ def classify_human(test_samples):
     labelled = pd.read_csv("task_4.csv")
     final = pd.concat([labelled, c], axis=1)
     final.to_csv("task_4.csv", index=False)
+
+    #learning curve
+    clf = svm.SVC(C=3, degree=2, gamma='scale', kernel='poly')
+    plot_learning_curves(Xtrain, Ytrain, Xtest, Ytest, clf)
+    plt.show()
 
 def classify_smile_dtree(test_samples):
     Xtrain, Xtest = divide_x(test_samples)
